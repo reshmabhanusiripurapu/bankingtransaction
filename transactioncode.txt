@@ -1,0 +1,226 @@
+package frame3;
+
+import java.sql.*;
+import java.awt.EventQueue;
+
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import net.proteanit.sql.DbUtils;
+import java.awt.Color;
+import javax.swing.JButton;
+import java.awt.Font;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.sql.*;
+import javax.swing.JTable;
+import javax.swing.JLabel;
+
+import java.util.Random; 
+import javax.swing.JScrollPane;
+import javax.swing.border.TitledBorder;
+
+public class Frame{
+
+	
+	private JFrame frame;
+	private int balance;
+	private JLabel lblBalance;
+
+	
+	 //Launch the application.
+
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					Frame window = new Frame();
+					window.frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+	
+	
+	private JTable table;
+	private JLabel lblLastFiveTransactions;
+	private JLabel lblTrnid;
+	private JLabel lblType;
+	private JLabel lblAmount;
+	private JLabel lblBalance_1;
+	
+	/**
+	 * Create the application.
+	 */
+	public Frame() {
+		
+		try {
+			  
+			    Connection myConn=null;
+			    Statement Stat=null;
+				String driver="com.mysql.jdbc.Driver";
+				String dbUrl="jdbc:mysql://localhost:3306/onlinebanking";
+			    String user="root1";
+			    String pass="bhanu@1552";
+			    Class.forName(driver);
+			    myConn=DriverManager.getConnection(dbUrl,user,pass);
+			    PreparedStatement pst = myConn.prepareStatement("Select balance from accountholder order by transactionid", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+				ResultSet rs = pst.executeQuery();
+				rs.last();
+				balance = rs.getInt("balance");
+			    Stat=myConn.createStatement();
+				for(int i=1;i<=10;i++) {
+					switch(i)
+				{
+					
+					case 1:
+						ResultSet rs1 = Stat.executeQuery(
+								"select AmountTransferred,transactionstate,balance from accountholder where transactionid=1 ");
+				        while (rs1.next()) {    
+							System.out.println("TRANSACTION1"+" "+rs1.getString("transactionstate")+":"+rs1.getShort("AmountTransferred") +" "+"balance:"+rs1.getShort("balance"));
+						}
+				      
+						break;
+					case 2:
+						ResultSet rs2 = Stat.executeQuery(
+								"select AmountTransferred,transactionstate,balance from accountholder where transactionid=2 ");
+				        while (rs2.next()) {    
+							System.out.println("TRANSACTION2"+" "+rs2.getString("transactionstate")+":"+rs2.getShort("AmountTransferred")+" "+"balance:"+rs2.getShort("balance"));
+						}
+						break;
+					case 3:
+						ResultSet rs3 = Stat.executeQuery(
+								"select AmountTransferred,transactionstate,balance from accountholder where transactionid=3 ");
+				        while (rs3.next()) {    
+							System.out.println("TRANSACTION3"+" "+rs3.getString("transactionstate")+":"+rs3.getShort("AmountTransferred")+" "+"balance:"+rs3.getShort("balance"));
+						}
+						break;
+					case 4:
+						ResultSet rs4 = Stat.executeQuery(
+								"select AmountTransferred,transactionstate,balance from accountholder where transactionid=4 ");
+				        while (rs4.next()) {    
+							System.out.println("TRANSACTION4"+" "+rs4.getString("transactionstate")+":"+rs4.getShort("AmountTransferred")+" "+"balance:"+rs4.getShort("balance"));
+						}
+						break;
+					case 5:
+						ResultSet rs5 = Stat.executeQuery(
+								"select AmountTransferred,transactionstate,balance from accountholder where transactionid=5 ");
+				        while (rs5.next()) {    
+							System.out.println("TRANSACTION5"+" "+rs5.getString("transactionstate")+":"+rs5.getShort("AmountTransferred")+" "+"balance:"+rs5.getShort("balance"));
+						}
+						break;
+						
+
+				}
+				}
+				}
+				catch(Exception exc){
+				exc.printStackTrace();
+				}
+		initialize();
+	}
+	private void initialize() {
+		Random rand = new Random();
+		frame = new JFrame();
+		frame.setResizable(false);
+		frame.getContentPane().setBackground(Color.cyan);
+		frame.setBounds(100, 100, 500, 400);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.getContentPane().setLayout(null);
+		
+		JButton fndTrnBtn = new JButton("Transfer fund");
+		fndTrnBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (balance < 1000) {
+					JOptionPane.showMessageDialog(null,  "Not enough balance, please add funds and try again");
+				} else {
+					balance -= 1000;
+					try {
+						Connection myConn=null;
+						String driver="com.mysql.jdbc.Driver";
+						String dbUrl="jdbc:mysql://localhost:3306/onlinebanking";
+					    String user="root1";
+					    String pass="bhanu@1552";
+					    Class.forName(driver);
+					    myConn=DriverManager.getConnection(dbUrl,user,pass);
+						PreparedStatement pst = myConn.prepareStatement("INSERT INTO accountholder values(transactionstate.nextval, \'deposited.\', " + 1000 + ", " + balance + ")");
+						pst.execute();
+						Statement stat=null;
+						stat = myConn.prepareStatement("select * from accountholder order by transactionid desc");
+						ResultSet rs = pst.executeQuery();
+						lblLastFiveTransactions.setVisible(true);
+						lblTrnid.setVisible(true);
+						lblType.setVisible(true);
+						lblAmount.setVisible(true);
+						lblBalance_1.setVisible(true);
+						table.setModel(DbUtils.resultSetToTableModel(rs));
+						
+						rs.close();
+						pst.close();
+					} catch (Exception e1) {
+						JOptionPane.showMessageDialog(null, e1);
+					}
+					lblBalance.setText("" + balance);
+				}
+			}
+		});
+		
+		fndTrnBtn.setBackground(Color.pink);
+		fndTrnBtn.setForeground(Color.black);
+		fndTrnBtn.setFont(new Font("Times New Roman", Font.PLAIN, 14));
+		fndTrnBtn.setBounds(324, 316, 150, 34);
+		frame.getContentPane().add(fndTrnBtn);
+		JLabel lblNewLabel = new JLabel("Current Balance: \u20B9");
+		lblNewLabel.setFont(new Font("calibri", Font.PLAIN, 14));
+		lblNewLabel.setBounds(210, 11, 122, 28);
+		frame.getContentPane().add(lblNewLabel);
+		
+		lblBalance = new JLabel("" + balance);
+		lblBalance.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		lblBalance.setForeground(new Color(0, 128, 0));
+		lblBalance.setBounds(333, 11, 103, 26);
+		frame.getContentPane().add(lblBalance);
+		
+		table = new JTable(){
+			
+			public boolean isCellEditable(int rowIndex, int colIndex) {
+				return false; //Disallow the editing of any cell
+				}
+				};
+		table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+		table.setFillsViewportHeight(true);
+		table.setRowHeight(30);
+		table.setShowVerticalLines(false);
+		table.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		table.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		table.setBounds(10, 123, 464, 158);
+		frame.getContentPane().add(table);
+		
+		lblLastFiveTransactions = new JLabel("Last five transactions");
+		lblLastFiveTransactions.setVisible(false);
+		lblLastFiveTransactions.setFont(new Font("Tahoma", Font.BOLD, 15));
+		lblLastFiveTransactions.setBounds(150, 48, 166, 26);
+		frame.getContentPane().add(lblLastFiveTransactions);
+		
+		lblTrnid = new JLabel("Trascid");
+		lblTrnid.setVisible(false);
+		lblTrnid.setBounds(23, 98, 48, 14);
+		frame.getContentPane().add(lblTrnid);
+		
+		lblType = new JLabel("mode");
+		lblType.setVisible(false);
+		lblType.setBounds(137, 98, 48, 14);
+		frame.getContentPane().add(lblType);
+		
+		lblAmount = new JLabel("Amount");
+		lblAmount.setVisible(false);
+		lblAmount.setBounds(282, 98, 48, 14);
+		frame.getContentPane().add(lblAmount);
+		
+		lblBalance_1 = new JLabel("Balance");
+		lblBalance_1.setVisible(false);
+		lblBalance_1.setBounds(417, 98, 48, 14);
+		frame.getContentPane().add(lblBalance_1);
+	}
+}
